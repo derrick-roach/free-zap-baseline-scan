@@ -56,13 +56,11 @@ jobs:
           artifact_name: 'zap-report' # optional, default is zap_scan
         continue-on-error: true
 
-      - name: Download ZAP HTML report artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: zap-report
-
       - name: Save ZAP HTML report
         run: |
+          echo ${PWD}
+          find -name zap-report
+          find -name zap-report.html
           mv zap-report.html scans/${{ env.SCAN_DATE }}/zap-report.html
 
       - name: Commit and push results

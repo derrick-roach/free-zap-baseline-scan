@@ -1,22 +1,52 @@
-# ZAP Baseline Testing v1
+# ZAP Baseline Testing v3
 
-# Basic setup. No fluff. Hardcoded target.
+# WIP. Use URL from GitHub Issue as target and update the issue with the zap scan report.
 
-name: ZAP Baseline Testing v1
+name: ZAP Baseline Testing v3
 
 # Controls when the workflow will run
 on:
+  issues:
+    types: [opened, edited]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   zap-baseline-test:
     name: ZAP Baseline Testing
+    
+    # Check issue title, label, and contains a URL
+    if: |
+      contains(github.event.issue.body, '🛡️ ZAP Scan Request') && 
+      contains(github.event.issue.labels.*.name, 'scan-request') && 
+      (contains(github.event.issue.body, 'http://') || contains(github.event.issue.body, 'https://'))
+    
     runs-on: ubuntu-latest
 
     steps:
       - name: Echo current date
         run: echo $NOW  # Show datetime
+
+      - name: Extract URL from issue
+        id: extract-url
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = context.payload.issue.body;
+            if (!body) return;
+            
+            // Extract URL starting with http or https
+            const regex = /\s+(https?:\/\/\S+)/i;
+            const match = body.match(regex);
+            
+            if (match && match[1]) {
+              const url = match[1].trim();
+              console.log(`Extracted URL: ${url}`);
+              core.setOutput('url', url);
+              return url;
+            } else {
+              core.setFailed('Invalid URL. Please edit to try again.');
+            }
         
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,9 +57,9 @@ jobs:
         uses: zaproxy/action-baseline@v0.14.0
         with:
           # GitHub Token to create issues in the repository
-          # token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
           # Target URL
-          target: https://ginandjuice.shop
+          target: ${{ steps.extract-url.outputs.url }}
           # Relative path of the ZAP configuration file
           # rules_file_name: # optional
           # The Docker file to be executed
@@ -38,10 +68,11 @@ jobs:
           # cmd_options: '-r zap-report-${{ env.NOW }}.html' # optional
           # The title for the GitHub issue to be created
           # issue_title: ZAP Report - ${{ env.NOW }} # optional, default is ZAP Scan Baseline Report
+          issue_title: ${{ github.event.issue.title }} 
           # The action status will be set to fail if ZAP identifies any alerts during the baseline scan
           fail_action: false # optional
           # The action will file the report to the GitHub issue using the issue_title input
-          allow_issue_writing: false # optional, default is true
+          allow_issue_writing: true # optional, default is true
           # The action will attach the report to the build with the name zap_scan. 
           # Set artifact_name to a different string to name it something else.
           artifact_name: 'zap-baseline-scan' # optional, default is zap_scan

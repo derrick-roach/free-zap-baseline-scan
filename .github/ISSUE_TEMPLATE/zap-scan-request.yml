@@ -1,0 +1,26 @@
+name: 🛡️ ZAP Scan Request
+description: Submit a valid URL to run zap baseline scan.
+title: "[SCAN] <your-site-url>"
+labels: [scan-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛡️ ZAP Scan Request
+        Please enter the valid URL to analyze with ZAP baseline scan.
+
+  - type: input
+    id: scan-url
+    attributes:
+      label: Website URL
+      description: Must include http:// or https://
+      placeholder: https://example.com
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ✅ Submit this form to trigger a scan. It may take a few minutes to complete. You’ll be notified via a comment when it is done.
+        ⚠️ Please ensure that the URL is valid and accessible. Invalid URLs may result in failed scans.
+

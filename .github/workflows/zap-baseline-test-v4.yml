@@ -1,0 +1,123 @@
+# ZAP Baseline Testing v4
+
+# WIP. Use URL from GitHub Issue as target and update the issue with the zap scan report.
+
+name: ZAP Baseline Testing v4
+
+# Controls when the workflow will run
+on:
+  issues:
+    types: [opened, edited]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Add permissions block at the workflow level
+permissions:
+    contents: read
+    issues: write
+
+jobs:
+  zap-baseline-test:
+    name: ZAP Baseline Testing
+    
+    # Check issue label and body contains a URL
+    if: |
+      contains(github.event.issue.labels.*.name, 'scan-request') && 
+      (contains(github.event.issue.body, 'http://') || contains(github.event.issue.body, 'https://'))
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo current date
+        run: echo $NOW  # Show datetime
+
+      - name: Extract URL from issue
+        id: extract-url
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = context.payload.issue.body;
+            if (!body) return;
+            
+            // Extract URL starting with http or https
+            const regex = /\s+(https?:\/\/\S+)/i;
+            const match = body.match(regex);
+            
+            if (match && match[1]) {
+              const url = match[1].trim();
+              console.log(`Extracted URL: ${url}`);
+              core.setOutput('url', url);
+              return url;
+            } else {
+              core.setFailed('Invalid URL. Please edit to try again.');
+            }
+        
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          # GitHub Token to create issues in the repository
+          token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
+          # Target URL
+          target: ${{ steps.extract-url.outputs.url }}
+          # The action status will be set to fail if ZAP identifies any alerts during the baseline scan
+          fail_action: false # optional
+          # The action will file the report to the GitHub issue using the issue_title input
+          allow_issue_writing: false # optional, default is true
+          # The action will attach the report to the build with the name zap_scan. 
+          # Set artifact_name to a different string to name it something else.
+          artifact_name: 'zap-baseline-scan' # optional, default is zap_scan
+        continue-on-error: true
+
+      - name: Parse ZAP report
+        id: parse-report
+        run: |
+          if [ -f ./report_html.html ]; then
+            # Extract alerts summary using grep/sed (basic example)
+            ALERTS_SUMMARY=$(grep -A 20 "Alert Summary" ./report_html.html | sed 's/<[^>]*>//g' | grep -v "^$" | head -10)
+            echo "ALERTS_SUMMARY<<EOF" >> $GITHUB_ENV
+            echo "$ALERTS_SUMMARY" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+        shell: bash
+        continue-on-error: true
+      
+      - name: Comment on issue with results
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const scanUrl = '${{ steps.extract-url.outputs.url }}';
+            const runId = context.runId;
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            
+            // Create a link to the workflow run's artifacts
+            const artifactLink = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts`;
+            const alertSummary = process.env.ALERTS_SUMMARY || 'No alert summary available';
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `# ✅ ZAP Baseline Scan Results for ${scanUrl}
+      
+                    ## Alert Summary
+                    \`\`\`
+                    ${alertSummary}
+                    \`\`\`
+                    
+                    ## Links
+                    - [Download complete scan reports](${artifactLink})
+                    - [View detailed scan results issue](https://github.com/${repoOwner}/${repoName}/issues?q=ZAP+Scan+Report)
+                    
+                    For security reasons, GitHub doesn't allow attaching files directly to issue comments.`
+            });
+        
+

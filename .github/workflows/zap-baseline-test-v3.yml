@@ -1,13 +1,13 @@
 # ZAP Baseline Testing v3
 
-# WIP. Use URL from GitHub Issue as target and update the issue with the zap scan report.
+# WIP. Use URL from GitHub Issue as target and write new issue with the zap scan report.
 
 name: ZAP Baseline Testing v3
 
 # Controls when the workflow will run
 on:
-  issues:
-    types: [opened, edited]
+  # issues:
+  #   types: [opened, edited]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -21,9 +21,9 @@ jobs:
     name: ZAP Baseline Testing
     
     # Check issue label and body contains a URL
-    if: |
-      contains(github.event.issue.labels.*.name, 'scan-request') && 
-      (contains(github.event.issue.body, 'http://') || contains(github.event.issue.body, 'https://'))
+    # if: |
+    #   contains(github.event.issue.labels.*.name, 'scan-request') && 
+    #   (contains(github.event.issue.body, 'http://') || contains(github.event.issue.body, 'https://'))
     
     runs-on: ubuntu-latest
 

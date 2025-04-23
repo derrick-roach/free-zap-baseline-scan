@@ -1,6 +1,6 @@
-# ZAP Baseline Testing
+# ZAP Baseline Testing v1
 
-name: ZAP Baseline Testing
+name: ZAP Baseline Testing v1
 
 # Controls when the workflow will run
 on:

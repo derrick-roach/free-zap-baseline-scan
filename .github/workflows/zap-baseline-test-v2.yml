@@ -75,6 +75,8 @@ jobs:
           git add scans/
           git commit -m "Add scan results for ${{ steps.extract.outputs.url }}"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: TODO Comment on issue with results
         uses: actions/github-script@v6

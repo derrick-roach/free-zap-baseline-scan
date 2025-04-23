@@ -1,0 +1,77 @@
+# ZAP Baseline Testing
+
+name: ZAP Baseline Testing
+
+# Controls when the workflow will run
+on:
+  # issues:
+  #   types: [opened, edited]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  zap-baseline-test:
+    name: ZAP Baseline Testing
+    # if: contains(github.event.issue.body, '/scan ')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo current date
+        run: echo $NOW  # Show datetime
+        
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create scan folder
+        run: |
+          export SCAN_DATE=$(date +%F)
+          mkdir -p scans/$SCAN_DATE
+          echo "SCAN_DATE=$SCAN_DATE" >> $GITHUB_ENV
+
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          # GitHub Token to create issues in the repository
+          # token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
+          # Target URL
+          target: https://ginandjuice.shop
+          # target: ${{ steps.extract.outputs.url }}
+          # Relative path of the ZAP configuration file
+          # rules_file_name: # optional
+          # The Docker file to be executed
+          # docker_name: 'owasp/zap2docker-stable' # default is owasp/zap2docker-stable
+          # Additional command line options
+          # cmd_options: '-r zap-report-${{ env.NOW }}.html' # optional
+          # The title for the GitHub issue to be created
+          # issue_title: ZAP Report - ${{ env.NOW }} # optional, default is ZAP Scan Baseline Report
+          # The action status will be set to fail if ZAP identifies any alerts during the baseline scan
+          fail_action: false # optional
+          # The action will file the report to the GitHub issue using the issue_title input
+          # allow_issue_writing: false # optional, default is true
+          # The action will attach the report to the build with the name zap_scan. 
+          # Set artifact_name to a different string to name it something else.
+          artifact_name: 'zap-report' # optional, default is zap_scan
+        continue-on-error: true
+
+      - name: Save ZAP HTML report
+        run: |
+          mv zap-report.html scans/${{ env.SCAN_DATE }}/zap-report.html
+
+      - name: Commit and push results
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git add scans/
+          git commit -m "Add scan results for ${{ steps.extract.outputs.url }}"
+          git push
+
+      - name: TODO Comment on issue with results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            echo $NOW
+    

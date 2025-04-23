@@ -56,6 +56,11 @@ jobs:
           artifact_name: 'zap-report' # optional, default is zap_scan
         continue-on-error: true
 
+      - name: Download ZAP HTML report artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: zap-report
+
       - name: Save ZAP HTML report
         run: |
           mv zap-report.html scans/${{ env.SCAN_DATE }}/zap-report.html
@@ -74,4 +79,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             echo $NOW
-    
+

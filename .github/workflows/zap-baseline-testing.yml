@@ -56,12 +56,16 @@ jobs:
           artifact_name: 'zap-report' # optional, default is zap_scan
         continue-on-error: true
 
+      - name: Debug File Location
+        run: |
+          echo "Current directory: ${PWD}"
+          find . -name "zap-report.html"
+          find . -name "report_html.html"
+          find . -name "report_md.md"
+
       - name: Save ZAP HTML report
         run: |
-          echo ${PWD}
-          find -name zap-report
-          find -name zap-report.html
-          mv zap-report.html scans/${{ env.SCAN_DATE }}/zap-report.html
+          mv zap-report/report_html.html scans/${{ env.SCAN_DATE }}/zap-report.html
 
       - name: Commit and push results
         run: |

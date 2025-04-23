@@ -15,9 +15,8 @@ jobs:
   zap-baseline-test:
     name: ZAP Baseline Testing
     
-    # Check issue title, label, and contains a URL
+    # Check issue label and body contains a URL
     if: |
-      contains(github.event.issue.body, '🛡️ ZAP Scan Request') && 
       contains(github.event.issue.labels.*.name, 'scan-request') && 
       (contains(github.event.issue.body, 'http://') || contains(github.event.issue.body, 'https://'))
     

@@ -50,7 +50,7 @@ jobs:
           # The action status will be set to fail if ZAP identifies any alerts during the baseline scan
           fail_action: false # optional
           # The action will file the report to the GitHub issue using the issue_title input
-          # allow_issue_writing: false # optional, default is true
+          allow_issue_writing: false # optional, default is true
           # The action will attach the report to the build with the name zap_scan. 
           # Set artifact_name to a different string to name it something else.
           artifact_name: 'zap-report' # optional, default is zap_scan
@@ -63,9 +63,10 @@ jobs:
           find . -name "report_html.html"
           find . -name "report_md.md"
 
-      - name: Save ZAP HTML report
+      - name: Save ZAP HTML & Markdown report
         run: |
-          mv zap-report/report_html.html scans/${{ env.SCAN_DATE }}/zap-report.html
+          mv ./report_html.html scans/${{ env.SCAN_DATE }}/zap-report.html
+          mv ./report_md.md scans/${{ env.SCAN_DATE }}/zap-report.md
 
       - name: Commit and push results
         run: |

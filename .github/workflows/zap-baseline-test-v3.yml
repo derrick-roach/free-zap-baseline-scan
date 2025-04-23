@@ -56,7 +56,8 @@ jobs:
         uses: zaproxy/action-baseline@v0.14.0
         with:
           # GitHub Token to create issues in the repository
-          token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
+          # token: ${{ secrets.GITHUB_TOKEN }} # optional, default is ${{ github.token }}
+          token: ${{ github.token }}
           # Target URL
           target: ${{ steps.extract-url.outputs.url }}
           # Relative path of the ZAP configuration file

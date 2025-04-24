@@ -121,7 +121,7 @@ jobs:
 
             // Create links to the workflow run's artifacts
             const artifactId = zapArtifact ? zapArtifact.id : null;
-            const artifactLink = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts`;
+            const artifactLink = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}`;
             
             // Direct download link if we found the artifact ID
             const directDownloadLink = artifactId ? 
@@ -135,20 +135,23 @@ jobs:
               repo: context.repo.repo,
               issue_number: issueNumber,
               body: `## ⚡️ ZAP Baseline Scan Results ⚡️
-              
-            ## Site: ${scanUrl}
+
+            ## 🌐 Site: ${scanUrl}
+
+            <br>
 
             ${process.env.SUMMARY}
 
             ${process.env.ALERTS}
 
-            Get the full reports and details with the links below.
+            <br><br>
+
+            👇 Get the full reports and details with the links below.
             
-            ## Links
-            - [See the workflow run and artifacts](${artifactLink})
-            - [Direct download of the full scan reports](${directDownloadLink})
+            ### 🔗 Links
+            - [🔍 See the workflow run and artifacts](${artifactLink})
+            - [⬇️ Direct download of the full scan reports](${directDownloadLink})
             
             🚀`
             });
         
-

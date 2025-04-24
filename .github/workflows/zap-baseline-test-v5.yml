@@ -106,29 +106,49 @@ jobs:
             const runId = context.runId;
             const repoOwner = context.repo.owner;
             const repoName = context.repo.repo;
-            
-            // Create a link to the workflow run's artifacts
+
+            // Fetch artifacts for this workflow run
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: repoOwner,
+              repo: repoName,
+              run_id: runId
+            });
+
+            // Find the ZAP scan artifact
+            const zapArtifact = artifacts.data.artifacts.find(artifact => 
+              artifact.name === 'zap-baseline-scan'
+            );
+
+            // Create links to the workflow run's artifacts
+            const artifactId = zapArtifact ? zapArtifact.id : null;
             const artifactLink = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts`;
-            const alertSummary = process.env.ALERTS_SUMMARY || 'No alert summary available';
+            
+            // Direct download link if we found the artifact ID
+            const directDownloadLink = artifactId ? 
+            `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts/${artifactId}` : null;
+
+            // Check if summary is available
+            const alertSummary = process.env.SUMMARY || 'No summary available';
             
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issueNumber,
               body: `## ⚡️ ZAP Baseline Scan Results ⚡️
-                    ## Site: ${scanUrl}
-      
-                    ${process.env.SUMMARY}
+              
+            ## Site: ${scanUrl}
 
-                    ${process.env.ALERTS}
+            ${process.env.SUMMARY}
 
-                    For the full reports and details, use the links below.
-                    
-                    ## Links
-                    - [Download complete scan reports](${artifactLink})
-                    - [View detailed scan results issue](https://github.com/${repoOwner}/${repoName}/issues?q=ZAP+Scan+Report)
-                    
-                    🚀`
+            ${process.env.ALERTS}
+
+            Get the full reports and details with the links below.
+            
+            ## Links
+            - [See the workflow run and artifacts](${artifactLink})
+            - [Direct download of the full scan reports](${directDownloadLink})
+            
+            🚀`
             });
         
 

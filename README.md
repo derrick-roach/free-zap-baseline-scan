@@ -1,4 +1,4 @@
-# 🆓 free-zap-baseline-scan ⚡️
+# 🆓 free-zap-baseline-scan⚡️
 
 A GitHub-powered (Actions & Issues) passive security testing tool using [ZAP baseline scan](https://github.com/zaproxy/action-baseline) to quickly identify misconfigurations and vulnerabilities in web applications.
 
@@ -13,8 +13,11 @@ This project provides an automated GitHub Actions workflow that leverages [ZAP (
 - ✅ **EASY** - Just submit a *ZAP Scan Request* issue 
 - 🥽 **SAFE** - Passive scan does not attack or harm target website
 - 🆓 **FREE** - No cost to you for this lean and efficient security scan
-- 🌎 **OPEN** - Publicly accessible to anyone with a GitHub account to try
-- ❎ **SETUP** - No installation or integration means no setup and upkeep for you
+- 🌎 **OPEN** - Publicly available to anyone with a GitHub account to try
+- ❌ **SETUP** - No installation or integration means no setup and upkeep for you
+- ♻️ **REUSE** - Request as many scans as you want, anytime, on-demand, at your convenience
+- 🔒 **TRUST** - ZAP is an industry-recognized and respected security testing tool
+- 📊 **RESULTS** - Get an alerts summary and reports with actionable guidance
 
 ## ⚡️ Quick Start
 ### Basic Usage
